@@ -1,11 +1,38 @@
 import pytest
 
-from src.exception.parsing_option_exception import UnknownOptionException, InvalidRequiredOptionPositionException, \
-    NotArgumentForOptionException, OptionRepeatException
-from tests.command_test import CommandTest
-from src.common.lexer import Lexer
 from src.common.option import Option
+from src.common.parser import Parser
+from src.exception.parsing_option_exception import (
+    UnknownOptionException,
+    InvalidRequiredOptionPositionException,
+    NotArgumentForOptionException,
+    OptionRepeatException,
+    ParseInvalidPositionException,
+)
+from src.common.lexer import Lexer
 from src.common.parsed_arguments import ParsedArguments
+
+OPTIONS = {
+        Option("Показать список файлов в директории", "-l", "--list", False, False),
+        Option("Показать скрытые файлы", "-a", "--all", False, False),
+        Option("Рекурсивно обойти подкаталоги", "-r", "--recursive", False, False),
+        Option("Вывести размер файлов в человеко-читаемом виде", "-h", "--human-readable", False, False),
+        Option("Принудительно удалить файлы без подтверждения", "-f", "--force", False, False),
+        Option("Задать формат вывода", "-F", "--format", True, False),
+        Option("Задать количество строк для вывода", "-n", "--lines", True, False),
+        Option("Сохранить результат в указанный файл", "-o", "--output", True, False),
+        Option("Отсортировать вывод по времени изменения", "-t", "--time", False, False),
+        Option("Отобразить только директории", "-d", "--dirs", False, False),
+        Option("Игнорировать регистр при поиске", "-i", "--ignore-case", False, False),
+        Option("Вывести только совпадения", "-m", "--matches-only", False, False),
+        Option("Показать версии программы", "-v", "--version", False, False),
+        Option("Задать максимальную глубину рекурсии", "-D", "--max-depth", True, False),
+        Option("Применить фильтр по расширению файла", "-e", "--extension", True, True),
+        Option("Указать шаблон для поиска", "-p", "--pattern", True, False),
+        Option("Не выводить сообщения об ошибках", "-q", "--quiet", False, False),
+        Option("Подсветить совпадения цветом", "-c", "--color", False, False),
+        Option("Показать подробный отчёт о действиях", "-V", "--verbose", False, False),
+    }
 
 
 @pytest.mark.parametrize(
@@ -13,245 +40,88 @@ from src.common.parsed_arguments import ParsedArguments
     [
         [
             "test -l -a -r",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Показать список файлов в директории", "-l", "--list", False, False),
-                    Option("Показать скрытые файлы", "-a", "--all", False, False),
-                    Option("Рекурсивно обойти подкаталоги", "-r", "--recursive", False, False),
-                },
-                {}
-            )
+            ParsedArguments(list(), {"-l", "-a", "-r"}, {})
         ],
         [
             "test --list --all --recursive",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Показать список файлов в директории", "-l", "--list", False, False),
-                    Option("Показать скрытые файлы", "-a", "--all", False, False),
-                    Option("Рекурсивно обойти подкаталоги", "-r", "--recursive", False, False),
-                },
-                {}
-            )
+            ParsedArguments(list(), {"--list", "--all", "--recursive"}, {})
         ],
         [
             "test -lar",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Показать список файлов в директории", "-l", "--list", False, False),
-                    Option("Показать скрытые файлы", "-a", "--all", False, False),
-                    Option("Рекурсивно обойти подкаталоги", "-r", "--recursive", False, False),
-                },
-                {}
-            )
+            ParsedArguments(list(), {"-l", "-a", "-r"}, {})
         ],
         [
             "test -lan 10",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Показать список файлов в директории", "-l", "--list", False, False),
-                    Option("Показать скрытые файлы", "-a", "--all", False, False),
-                },
-                {
-                    Option("Задать количество строк для вывода", "-n", "--lines", True, False): "10",
-                }
-            )
+            ParsedArguments(list(), {"-l", "-a"}, {"-n": "10"})
         ],
         [
             "test -o output.txt -h -t",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Вывести размер файлов в человеко-читаемом виде", "-h", "--human-readable", False, False),
-                    Option("Отсортировать вывод по времени изменения", "-t", "--time", False, False),
-                },
-                {
-                    Option("Сохранить результат в указанный файл", "-o", "--output", True, False): "output.txt",
-                }
-            )
+            ParsedArguments(list(), {"-h", "-t"}, {"-o": "output.txt"})
         ],
         [
             "test --output result.log --human-readable --time",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Вывести размер файлов в человеко-читаемом виде", "-h", "--human-readable", False, False),
-                    Option("Отсортировать вывод по времени изменения", "-t", "--time", False, False),
-                },
-                {
-                    Option("Сохранить результат в указанный файл", "-o", "--output", True, False): "result.log",
-                }
-            )
+            ParsedArguments(list(), {"--human-readable", "--time"}, {"--output": "result.log"})
         ],
         [
             "test -e .txt -e .md -e .pdf",
-            ParsedArguments(
-                list(),
-                set(),
-                {
-                    Option("Применить фильтр по расширению файла", "-e", "--extension", True, True): ".pdf",
-                }
-            )
+            ParsedArguments(list(), set(), {"-e": ".pdf"})
         ],
         [
             'test --pattern "report 2025" -i',
-            ParsedArguments(
-                list(),
-                {
-                    Option("Игнорировать регистр при поиске", "-i", "--ignore-case", False, False),
-                },
-                {
-                    Option("Указать шаблон для поиска", "-p", "--pattern", True, False): "report 2025",
-                }
-            )
+            ParsedArguments(list(), {"-i"}, {"--pattern": "report 2025"})
         ],
         [
             "test --max-depth 3 -r -d",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Рекурсивно обойти подкаталоги", "-r", "--recursive", False, False),
-                    Option("Отобразить только директории", "-d", "--dirs", False, False),
-                },
-                {
-                    Option("Задать максимальную глубину рекурсии", "-D", "--max-depth", True, False): "3",
-                }
-            )
+            ParsedArguments(list(), {"-r", "-d"}, {"--max-depth": "3"})
         ],
         [
             "test -V -D 2 --lines 50",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Показать подробный отчёт о действиях", "-V", "--verbose", False, False),
-                },
-                {
-                    Option("Задать максимальную глубину рекурсии", "-D", "--max-depth", True, False): "2",
-                    Option("Задать количество строк для вывода", "-n", "--lines", True, False): "50",
-                }
-            )
+            ParsedArguments(list(), {"-V"}, {"-D": "2", "--lines": "50"})
         ],
         [
             'test -c -m --pattern "[A-Z]{3}[0-9]{2}"',
-            ParsedArguments(
-                list(),
-                {
-                    Option("Подсветить совпадения цветом", "-c", "--color", False, False),
-                    Option("Вывести только совпадения", "-m", "--matches-only", False, False),
-                },
-                {
-                    Option("Указать шаблон для поиска", "-p", "--pattern", True, False): "[A-Z]{3}[0-9]{2}",
-                }
-            )
+            ParsedArguments(list(), {"-c", "-m"}, {"--pattern": "[A-Z]{3}[0-9]{2}"})
         ],
         [
             "test --format table --output out.txt",
-            ParsedArguments(
-                list(),
-                set(),
-                {
-                    Option("Задать формат вывода", "-F", "--format", True, False): "table",
-                    Option("Сохранить результат в указанный файл", "-o", "--output", True, False): "out.txt",
-                }
-            )
+            ParsedArguments(list(), set(), {"--format": "table", "--output": "out.txt"})
         ],
         [
             "test -t -n 100 --dirs",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Отсортировать вывод по времени изменения", "-t", "--time", False, False),
-                    Option("Отобразить только директории", "-d", "--dirs", False, False),
-                },
-                {
-                    Option("Задать количество строк для вывода", "-n", "--lines", True, False): "100",
-                }
-            )
+            ParsedArguments(list(), {"-t", "--dirs"}, {"-n": "100"})
         ],
         [
             "test -a -e jpg -e png --recursive --max-depth 1",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Показать скрытые файлы", "-a", "--all", False, False),
-                    Option("Рекурсивно обойти подкаталоги", "-r", "--recursive", False, False),
-                },
-                {
-                    Option("Применить фильтр по расширению файла", "-e", "--extension", True, True): "png",
-                    Option("Задать максимальную глубину рекурсии", "-D", "--max-depth", True, False): "1",
-                }
-            )
+            ParsedArguments(list(), {"-a", "--recursive"}, {"-e": "png", "--max-depth": "1"})
         ],
         [
             "test -r -D 0",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Рекурсивно обойти подкаталоги", "-r", "--recursive", False, False),
-                },
-                {
-                    Option("Задать максимальную глубину рекурсии", "-D", "--max-depth", True, False): "0",
-                }
-            )
+            ParsedArguments(list(), {"-r"}, {"-D": "0"})
         ],
         [
             "test -h -t -v",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Вывести размер файлов в человеко-читаемом виде", "-h", "--human-readable", False, False),
-                    Option("Отсортировать вывод по времени изменения", "-t", "--time", False, False),
-                    Option("Показать версии программы", "-v", "--version", False, False),
-                },
-                {}
-            )
+            ParsedArguments(list(), {"-h", "-t", "-v"}, {})
         ],
         [
             "test -q --color",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Не выводить сообщения об ошибках", "-q", "--quiet", False, False),
-                    Option("Подсветить совпадения цветом", "-c", "--color", False, False),
-                },
-                {}
-            )
+            ParsedArguments(list(), {"-q", "--color"}, {})
         ],
         [
             "test --format json --quiet --dirs",
-            ParsedArguments(
-                list(),
-                {
-                    Option("Не выводить сообщения об ошибках", "-q", "--quiet", False, False),
-                    Option("Отобразить только директории", "-d", "--dirs", False, False),
-                },
-                {
-                    Option("Задать формат вывода", "-F", "--format", True, False): "json",
-                }
-            )
+            ParsedArguments(list(), {"--quiet", "--dirs"}, {"--format": "json"})
         ],
         [
             "test -F csv -o out.csv -e csv",
-            ParsedArguments(
-                list(),
-                set(),
-                {
-                    Option("Задать формат вывода", "-F", "--format", True, False): "csv",
-                    Option("Сохранить результат в указанный файл", "-o", "--output", True, False): "out.csv",
-                    Option("Применить фильтр по расширению файла", "-e", "--extension", True, True): "csv",
-                }
-            )
-        ],
+            ParsedArguments(list(), set(), {"-F": "csv", "-o": "out.csv", "-e": "csv"})
+        ]
     ]
 )
 def test_parser_with_valid_arguments(input_line, result):
     lexer = Lexer()
     argument_line = lexer.lexing(input_line)
-    test_command = CommandTest(argument_line)
-    assert test_command.get_parsed_arguments() == result
+    parser = Parser()
+    parsed_arguments = parser.parse(OPTIONS, argument_line)
+    assert parsed_arguments == result
 
 @pytest.mark.parametrize(
     "input_line, exc",
@@ -264,16 +134,16 @@ def test_parser_with_valid_arguments(input_line, result):
         ["test -De 3", InvalidRequiredOptionPositionException],
         ["test -pe pattern", InvalidRequiredOptionPositionException],
         ["test -el jpg", InvalidRequiredOptionPositionException],
-        ["test -n", NotArgumentForOptionException],
-        ["test --lines", NotArgumentForOptionException],
-        ["test -o", NotArgumentForOptionException],
-        ["test --output", NotArgumentForOptionException],
-        ["test -D", NotArgumentForOptionException],
-        ["test --max-depth", NotArgumentForOptionException],
-        ["test -e", NotArgumentForOptionException],
-        ["test --extension", NotArgumentForOptionException],
-        ["test -p", NotArgumentForOptionException],
-        ["test --pattern", NotArgumentForOptionException],
+        ["test -n", ParseInvalidPositionException],
+        ["test --lines", ParseInvalidPositionException],
+        ["test -o", ParseInvalidPositionException],
+        ["test --output", ParseInvalidPositionException],
+        ["test -D", ParseInvalidPositionException],
+        ["test --max-depth", ParseInvalidPositionException],
+        ["test -e", ParseInvalidPositionException],
+        ["test --extension", ParseInvalidPositionException],
+        ["test -p", ParseInvalidPositionException],
+        ["test --pattern", ParseInvalidPositionException],
         ["test -n -a", NotArgumentForOptionException],
         ["test -o -l", NotArgumentForOptionException],
         ["test -D -r", NotArgumentForOptionException],
@@ -290,12 +160,12 @@ def test_parser_with_valid_arguments(input_line, result):
         ["test -q -q", OptionRepeatException],
         ["test -d -d", OptionRepeatException],
         ["test -h -h", OptionRepeatException],
-        ["test -e jpg -e", NotArgumentForOptionException],
+        ["test -e jpg -e", ParseInvalidPositionException],
     ]
 )
 def test_parser_invalid_arguments_raise(input_line, exc):
     lexer = Lexer()
+    parser = Parser()
     with pytest.raises(exc):
         argument_line = lexer.lexing(input_line)
-        command_test = CommandTest(argument_line)
-        command_test.get_parsed_arguments()
+        parser.parse(OPTIONS, argument_line)

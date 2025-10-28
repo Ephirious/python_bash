@@ -1,15 +1,12 @@
-from src.common.option import Option
-
-
 class ParsedArguments:
     position_arguments: list[str]
-    options_without_argument: set[Option]
-    options_with_argument: dict[Option, str]
+    options_without_argument: set[str]
+    options_with_argument: dict[str, str]
 
     def __init__(self,
                  position_arguments: list[str],
-                 options_without_arguments: set[Option],
-                 options_with_arguments: dict[Option, str]):
+                 options_without_arguments: set[str],
+                 options_with_arguments: dict[str, str]):
         self.position_arguments = position_arguments
         self.options_without_argument = options_without_arguments
         self.options_with_argument = options_with_arguments
@@ -17,10 +14,10 @@ class ParsedArguments:
     def get_position_arguments(self) -> list[str]:
         return self.position_arguments
 
-    def get_options_without_argument(self) -> set[Option]:
+    def get_options_without_argument(self) -> set[str]:
         return self.options_without_argument
 
-    def get_options_with_argument(self) -> dict[Option, str]:
+    def get_options_with_argument(self) -> dict[str, str]:
         return self.options_with_argument
 
     def __eq__(self, other):
