@@ -25,18 +25,8 @@ class Parser:
     BEGINNING_OPTION_CHAR = '-'
     POSITIONAL_POINT = "--"
 
-    def __init__(self):
-        self.available_options = set()
-        self.arguments = list()
-        self.pos = 0
-        self.position_arguments = list()
-        self.options_without_arguments = set()
-        self.options_with_arguments = dict()
-        self.is_next_position = False
-        self._options_by_short_name = {}
-        self._options_by_full_name = {}
-
     def parse(self, available_options : set[Option], input_arguments : InputArguments) -> ParsedArguments:
+        self._clear()
         self.arguments = input_arguments.get_arguments()
         self._parse_option_for_dict(available_options)
 
@@ -185,3 +175,14 @@ class Parser:
     def _check_is_required_argument(self, option: str) -> None:
         if self._is_required_argument(option):
             raise InvalidRequiredOptionPositionException(option)
+
+    def _clear(self):
+        self.available_options = set()
+        self.arguments = list()
+        self.pos = 0
+        self.position_arguments = list()
+        self.options_without_arguments = set()
+        self.options_with_arguments = dict()
+        self.is_next_position = False
+        self._options_by_short_name = {}
+        self._options_by_full_name = {}
