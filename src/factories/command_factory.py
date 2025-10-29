@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.commands.abstract_commands import AbstractCommand
+from src.commands.command_cat import CommandCat
 from src.commands.command_cd import CommandCD
 from src.commands.command_ls import CommandLS
 from src.common.parser import Parser
@@ -21,7 +22,8 @@ class AbstractCommandFactory(ABC):
 class CommandFactoryImp(AbstractCommandFactory):
     COMMANDS = {
         "ls": CommandLS,
-        "cd": CommandCD
+        "cd": CommandCD,
+        "cat": CommandCat
     }
 
     def __init__(self, parser: Parser):

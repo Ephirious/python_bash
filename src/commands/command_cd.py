@@ -7,7 +7,7 @@ from src.common.input_arguments import InputArguments
 from src.common.option import Option
 from src.common.parsed_arguments import ParsedArguments
 from src.common.parser import Parser
-from src.exception.command_exception import UnexpectedArguments
+from src.exception.command_exception import UnexpectedArgumentsException
 from src.utils.path_utils import PathUtils
 
 
@@ -36,4 +36,4 @@ class CommandCD(AbstractCommand):
                     context.current_directory = new_path.absolute()
                     os.chdir(new_path)
             case _:
-                raise UnexpectedArguments(self.parsed_arguments.position_arguments[1:])
+                raise UnexpectedArgumentsException(self.parsed_arguments.position_arguments[1:])

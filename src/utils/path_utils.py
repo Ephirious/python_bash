@@ -2,6 +2,10 @@ from datetime import datetime
 from pathlib import Path
 from stat import filemode
 
+from src.exception.command_exception import (
+    NotTypeFileException,
+    NotTypeDirectoryException,
+)
 from src.exception.path_utils_exception import InvalidPathException
 
 
@@ -15,13 +19,13 @@ class PathUtils:
     def check_presence_file(path:Path) -> None:
         PathUtils.check_presence(path)
         if not path.is_file():
-            raise InvalidPathException(path)
+            raise NotTypeFileException(path.name)
 
     @staticmethod
     def check_presence_directory(path:Path) -> None:
         PathUtils.check_presence(path)
         if not path.is_dir():
-            raise InvalidPathException(path)
+            raise NotTypeDirectoryException(path.name)
 
     @staticmethod
     def get_filemode(path: Path) -> str:
