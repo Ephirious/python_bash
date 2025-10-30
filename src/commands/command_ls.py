@@ -3,6 +3,7 @@ from pathlib import Path
 from src.commands.abstract_commands import AbstractCommand
 from src.common.context import Context
 from src.common.input_arguments import InputArguments
+from src.common.logger import Logger
 from src.common.option import Option
 from src.common.parsed_arguments import ParsedArguments
 from src.common.parser import Parser
@@ -21,8 +22,8 @@ class CommandLS(AbstractCommand):
     FILE_EMOJI = "📄"
     UNEXPECTED_TYPE = "❔"
 
-    def __init__(self, parser: Parser):
-        super().__init__(CommandLS.OPTIONS, parser, ParsedArguments([], set(), {}))
+    def __init__(self, parser: Parser, logger: Logger):
+        super().__init__(CommandLS.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
         self.parsed_arguments = self.parser.parse(CommandLS.OPTIONS, arguments)
@@ -48,9 +49,11 @@ class CommandLS(AbstractCommand):
         if AbstractCommand.is_in_parsed_arguments("-h", "--help", parsed_arguments):
             self.output_help()
         elif self.is_in_parsed_arguments("-l", "--list", parsed_arguments):
-            print(self._get_ls_output_with_l_option(paths, is_write_path_name))
+            program_output = self._get_ls_output_with_l_option(paths, is_write_path_name)
+            self.logger.print(program_output)
         else:
-            print(self._get_ls_output_without_l_option(paths, is_write_path_name))
+            program_output = self._get_ls_output_without_l_option(paths, is_write_path_name)
+            self.logger.print(program_output)
 
     @staticmethod
     def _get_path_name_with_emoji(path: Path) -> str:

@@ -3,6 +3,7 @@ from typing import Any, Callable
 
 from src.common.context import Context
 from src.common.input_arguments import InputArguments
+from src.common.logger import Logger
 from src.common.option import Option
 from src.common.parsed_arguments import ParsedArguments
 from src.common.parser import Parser
@@ -12,11 +13,13 @@ class AbstractCommand(ABC):
     available_options: set[Option]
     parser: Parser
     parsed_arguments: ParsedArguments
+    logger: Logger
 
-    def __init__(self, options: set[Option], parser: Parser, parsed_arguments: ParsedArguments):
+    def __init__(self, options: set[Option], parser: Parser, logger: Logger):
         self.available_options = options
         self.parser = parser
-        self.parsed_arguments = parsed_arguments
+        self.parsed_arguments = ParsedArguments([], set(), {})
+        self.logger = logger
 
     @abstractmethod
     def execute(self, arguments: InputArguments, context: Context):
@@ -42,7 +45,8 @@ class AbstractCommand(ABC):
                 f"{str(option.is_repeatable()):<{len("REPEATABLE")}} "
                 f"{option.get_description()} \n"
             )
-        print(result[:-1])
+        self.logger.info(result[:-1])
+        self.logger.print(result[:-1])
 
     @staticmethod
     def is_in_parsed_arguments(option_short: str, option_long: str, parsed_arguments: ParsedArguments) -> bool:

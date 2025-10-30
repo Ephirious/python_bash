@@ -4,6 +4,7 @@ from src.commands.abstract_commands import AbstractCommand
 from src.commands.command_cat import CommandCat
 from src.commands.command_cd import CommandCD
 from src.commands.command_ls import CommandLS
+from src.common.logger import Logger
 from src.common.parser import Parser
 from src.exception.command_factory_exception import UnknownCommand
 
@@ -20,16 +21,19 @@ class AbstractCommandFactory(ABC):
 
 
 class CommandFactoryImp(AbstractCommandFactory):
+    logger: Logger
+
     COMMANDS = {
         "ls": CommandLS,
         "cd": CommandCD,
         "cat": CommandCat
     }
 
-    def __init__(self, parser: Parser):
+    def __init__(self, parser: Parser, logger: Logger):
         super().__init__(parser)
+        self.logger = logger
 
     def create_command(self, command: str) -> AbstractCommand:
         if command in CommandFactoryImp.COMMANDS:
-            return CommandFactoryImp.COMMANDS[command](self.parser)
+            return CommandFactoryImp.COMMANDS[command](self.parser, self.logger)
         raise UnknownCommand(command)

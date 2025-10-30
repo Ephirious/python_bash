@@ -4,8 +4,8 @@ from pathlib import Path
 from src.commands.abstract_commands import AbstractCommand
 from src.common.context import Context
 from src.common.input_arguments import InputArguments
+from src.common.logger import Logger
 from src.common.option import Option
-from src.common.parsed_arguments import ParsedArguments
 from src.common.parser import Parser
 from src.exception.command_exception import UnexpectedArgumentsException
 from src.utils.path_utils import PathUtils
@@ -15,8 +15,8 @@ class CommandCD(AbstractCommand):
     OPTIONS: set[Option] = set()
     TILDA = "~"
 
-    def __init__(self, parser: Parser):
-        super().__init__(CommandCD.OPTIONS, parser, ParsedArguments([], set(), {}))
+    def __init__(self, parser: Parser, logger: Logger):
+        super().__init__(CommandCD.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
         self.parsed_arguments = self.parser.parse(CommandCD.OPTIONS, arguments)

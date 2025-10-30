@@ -1,4 +1,4 @@
-
+from src.common.logger import Logger
 from src.common.context import Context
 from src.common.lexer import Lexer
 from src.exception.shell_exception import ShellException
@@ -13,11 +13,11 @@ class CommandShell:
     EXIT_COMMAND = "exit"
     TILDA = "~"
 
-    def __init__(self, command_factory: AbstractCommandFactory, lexer: Lexer):
+    def __init__(self, command_factory: AbstractCommandFactory, lexer: Lexer, logger: Logger):
         self.command_factory = command_factory
         self.lexer = lexer
         self.context = Context()
-
+        self.logger = logger
 
     def run(self):
         self._start_shell_loop()
@@ -35,8 +35,9 @@ class CommandShell:
             try:
                 command = self.command_factory.create_command(lexed_arguments.get_command())
                 command.execute(lexed_arguments, self.context)
+                self.logger.info(user_input)
             except ShellException as exception:
-                print(exception.message)
+                self.logger.error(exception.message)
 
     def _replace_tilda(self, lexed_arguments: list[str]) -> None:
         for i in range(len(lexed_arguments)):
