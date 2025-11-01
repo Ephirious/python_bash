@@ -8,6 +8,7 @@ from src.common.logger import Logger
 from src.common.option import Option
 from src.common.parsed_arguments import ParsedArguments
 from src.common.parser import Parser
+from src.exception.command_exception import NotEnoughArgumentsException
 from src.exception.shell_exception import ShellException
 from src.utils.path_utils import PathUtils
 
@@ -51,7 +52,6 @@ class AbstractCommand(ABC):
                 f"{str(option.is_repeatable()):<{len("REPEATABLE")}} "
                 f"{option.get_description()} \n"
             )
-        self.logger.info(result[:-1])
         self.logger.print(result[:-1])
         return True
 
@@ -67,6 +67,13 @@ class AbstractCommand(ABC):
         return max(
             [len(str(method(obj))) for obj in objects]
         )
+
+    def _get_options_arguments(self, short_name: str, long_name: str) -> str:
+        if short_name in self.parsed_arguments.options_with_argument:
+            return self.parsed_arguments.options_with_argument[short_name]
+        elif long_name in self.parsed_arguments.options_with_argument:
+            return self.parsed_arguments.options_with_argument[long_name]
+        raise NotEnoughArgumentsException()
 
     def _remove_if(self, paths: list[str], path_utils_func: Callable[[Path], Any]) -> int:
         removed_paths = []

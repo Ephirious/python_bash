@@ -1,5 +1,7 @@
 import os
 import shutil
+import tarfile
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from stat import filemode
@@ -113,6 +115,10 @@ class PathUtils:
         shutil.move(src, dest)
 
     @staticmethod
+    def remove(src: Path) -> None:
+        src.unlink()
+
+    @staticmethod
     def mkdir(path: Path, ok_exists: bool) -> None:
         path.mkdir(exist_ok=ok_exists)
 
@@ -122,3 +128,30 @@ class PathUtils:
         if not path.is_relative_to(Path.home()):
             raise NotEnoughPermissionToRemoveException(str(path))
 
+    @staticmethod
+    def create_tar_archive(archive_name: str, files: list[Path]) -> None:
+        with tarfile.open(archive_name, "w:gz") as tar:
+            for file in files:
+                tar.add(file, arcname=file.name)
+
+    @staticmethod
+    def untar_archive(archive_name: str) -> None:
+        with tarfile.open(archive_name, "r:gz") as tar:
+            tar.extractall()
+
+    @staticmethod
+    def create_zip_archive(archive_name: str, files: list[Path]) -> None:
+        with zipfile.ZipFile(archive_name, "w") as zip:
+            for file in files:
+                zip.write(file, arcname=file.name)
+
+    @staticmethod
+    def unzip_archive(archive_name: str) -> None:
+        with zipfile.ZipFile(archive_name, "r") as zip:
+            zip.extractall()
+
+    @staticmethod
+    def get_all_files_in_path(path: Path) -> list[Path]:
+        return list(
+            [cur_path for cur_path in path.rglob("*") if cur_path.is_file()]
+        )

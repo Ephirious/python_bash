@@ -54,3 +54,10 @@ class NotEnoughPermissionToRemoveException(ShellException):
     MESSAGE = "Not enough permission for remove: "
     def __init__(self, path: str):
         super().__init__(NotEnoughPermissionToRemoveException.MESSAGE + path)
+
+
+class InvalidArgumentsException(ShellException):
+    MESSAGE = "Invalid arguments: "
+
+    def __init__(self, args: list[str]):
+        super().__init__(InvalidArgumentsException.MESSAGE + ", ".join(args))

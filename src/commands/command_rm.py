@@ -18,7 +18,6 @@ class CommandRM(AbstractCommand):
         Option("Показать список всех опций", "-h", "--help", False, True),
         Option("Рекурсивное удаление каталога вместе с содержимым", "-r", "--recursive", False, True),
     }
-    TRASH_DIR_NAME = ".trash"
     NEGATIVE_ANSWER = "n"
     POSITIVE_ANSWER = "y"
 
@@ -29,10 +28,10 @@ class CommandRM(AbstractCommand):
         self.parsed_arguments = self.parser.parse(CommandRM.OPTIONS, arguments)
         if self.output_help_if_need():
             return
-        CommandRM._create_trash(context.HOME / CommandRM.TRASH_DIR_NAME)
-        removed = self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_presence)
-        removed += self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_root_directory)
-        removed += self._remove_directions_if_r_not_exist()
+        CommandRM._create_trash(context.TRASH_DIR_PATH)
+        self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_presence)
+        self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_root_directory)
+        self._remove_directions_if_r_not_exist()
 
         count_position_arguments = len(self.parsed_arguments.position_arguments)
 
@@ -45,7 +44,9 @@ class CommandRM(AbstractCommand):
 
                 for path_as_str in self.parsed_arguments.position_arguments:
                     path = PathUtils.get_resolved_path(Path(path_as_str))
-                    PathUtils.move(path, context.HOME / CommandRM.TRASH_DIR_NAME)
+                    if PathUtils.is_path_exists(context.TRASH_DIR_PATH / path.name):
+                        PathUtils.remove(context.TRASH_DIR_PATH / path.name)
+                    PathUtils.move(path, context.HOME / Context.TRASH_DIR_PATH)
 
     @staticmethod
     def _create_trash(path: Path) -> None:
