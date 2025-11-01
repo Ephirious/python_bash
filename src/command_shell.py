@@ -33,10 +33,11 @@ class CommandShell:
                 break
 
             try:
+                self.logger.info(user_input)
                 command = self.command_factory.create_command(lexed_arguments.get_command())
                 command.execute(lexed_arguments, self.context)
-                self.logger.info(user_input)
             except ShellException as exception:
+                self.logger.print(exception.message)
                 self.logger.error(exception.message)
 
     def _replace_tilda(self, lexed_arguments: list[str]) -> None:

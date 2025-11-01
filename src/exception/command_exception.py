@@ -28,3 +28,29 @@ class NotTypeDirectoryException(ShellException):
 
     def __init__(self, directory: str):
         super().__init__(NotTypeFileException.MESSAGE + directory)
+
+class NotEnoughOptionException(ShellException):
+    MESSAGE = "Not enough option: "
+
+    def __init__(self, option: str):
+        super().__init__(NotEnoughOptionException.MESSAGE + option)
+
+
+class NotAccessToReadException(ShellException):
+    MESSAGE = "Next file or directory is not readable: "
+
+    def __init__(self, path: str):
+        super().__init__(NotAccessToReadException.MESSAGE + path)
+
+
+class NotAccessToWriteException(ShellException):
+    MESSAGE = "Next file or directory is not writeable: "
+
+    def __init__(self, path: str):
+        super().__init__(NotAccessToWriteException.MESSAGE + path)
+
+
+class NotEnoughPermissionToRemoveException(ShellException):
+    MESSAGE = "Not enough permission for remove: "
+    def __init__(self, path: str):
+        super().__init__(NotEnoughPermissionToRemoveException.MESSAGE + path)

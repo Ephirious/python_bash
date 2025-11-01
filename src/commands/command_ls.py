@@ -11,8 +11,6 @@ from src.utils.path_utils import PathUtils
 
 
 class CommandLS(AbstractCommand):
-    parsed_arguments: ParsedArguments
-
     OPTIONS = {
         Option("Показать список файлов в директории", "-l", "--list", False, True),
         Option("Показать список всех опций", "-h", "--help", False, True),
@@ -27,28 +25,34 @@ class CommandLS(AbstractCommand):
 
     def execute(self, arguments: InputArguments, context: Context):
         self.parsed_arguments = self.parser.parse(CommandLS.OPTIONS, arguments)
+        if self.output_help_if_need():
+            return
+
+        removed = 0
+        removed += self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_presence)
+        removed += self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_readable)
+
+        if removed != 0 and len(self.parsed_arguments.position_arguments) == 0:
+            return
+
         count_position_arguments = len(self.parsed_arguments.position_arguments)
 
         match count_position_arguments:
             case 0:
-                PathUtils.check_presence_directory(context.current_directory)
-                directory = PathUtils.get_directory_content(context.current_directory)
-                self._output_content(directory, self.parsed_arguments, False)
-            case 1:
-                user_path = PathUtils.get_resolved_path(Path(self.parsed_arguments.position_arguments[0]))
-                directory = PathUtils.get_directory_content(user_path)
-                self._output_content(directory, self.parsed_arguments, False)
+                PathUtils.check_presence(context.current_directory)
+                PathUtils.check_readable(context.current_directory)
+                directory_content = PathUtils.get_directory_content(context.current_directory)
+                self._output_content(directory_content, self.parsed_arguments, False)
             case _:
+                is_write_path = count_position_arguments != 1
                 for path in self.parsed_arguments.position_arguments:
                     current_path = PathUtils.get_resolved_path(Path(path))
-                    directory = PathUtils.get_directory_content(current_path)
-                    self._output_content(directory, self.parsed_arguments, True)
+                    directory_content = PathUtils.get_directory_content(current_path)
+                    self._output_content(directory_content, self.parsed_arguments, is_write_path)
 
 
     def _output_content(self, paths: list[Path], parsed_arguments: ParsedArguments, is_write_path_name: bool) -> None:
-        if AbstractCommand.is_in_parsed_arguments("-h", "--help", parsed_arguments):
-            self.output_help()
-        elif self.is_in_parsed_arguments("-l", "--list", parsed_arguments):
+        if AbstractCommand.is_in_parsed_arguments("-l", "--list", parsed_arguments):
             program_output = self._get_ls_output_with_l_option(paths, is_write_path_name)
             self.logger.print(program_output)
         else:

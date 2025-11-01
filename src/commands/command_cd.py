@@ -12,7 +12,9 @@ from src.utils.path_utils import PathUtils
 
 
 class CommandCD(AbstractCommand):
-    OPTIONS: set[Option] = set()
+    OPTIONS: set[Option] = {
+        Option("Показать список всех опций", "-h", "--help", False, True)
+    }
     TILDA = "~"
 
     def __init__(self, parser: Parser, logger: Logger):
@@ -20,6 +22,8 @@ class CommandCD(AbstractCommand):
 
     def execute(self, arguments: InputArguments, context: Context):
         self.parsed_arguments = self.parser.parse(CommandCD.OPTIONS, arguments)
+        if self.output_help_if_need():
+            return
         count_position_arguments = len(self.parsed_arguments.position_arguments)
 
         match count_position_arguments:
@@ -33,6 +37,7 @@ class CommandCD(AbstractCommand):
                     os.chdir(context.HOME)
                 else:
                     new_path = PathUtils.get_resolved_path(Path(user_input))
+                    PathUtils.check_presence(new_path)
                     context.current_directory = new_path.absolute()
                     os.chdir(new_path)
             case _:

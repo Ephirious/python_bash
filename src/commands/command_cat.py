@@ -11,13 +11,22 @@ from src.utils.path_utils import PathUtils
 
 
 class CommandCat(AbstractCommand):
-    OPTIONS: set[Option] = set()
+    OPTIONS: set[Option] = {
+        Option("Показать список всех опций", "-h", "--help", False, True)
+    }
+    ENCODING_MODE: str = "utf-8"
+    ERRORS_MODE: str = "ignore"
 
     def __init__(self, parser: Parser, logger: Logger):
         super().__init__(CommandCat.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
         self.parsed_arguments = self.parser.parse(CommandCat.OPTIONS, arguments)
+        if self.output_help_if_need():
+            return
+        self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_presence_file)
+        self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_readable)
+
         count_position_arguments = len(self.parsed_arguments.position_arguments)
 
         match count_position_arguments:
@@ -26,6 +35,5 @@ class CommandCat(AbstractCommand):
             case _:
                 for path_as_str in self.parsed_arguments.position_arguments:
                     path = Path(path_as_str)
-                    PathUtils.check_presence_file(path)
-                    file_text = path.read_text(encoding="utf-8", errors="ignore")
+                    file_text = path.read_text(encoding=CommandCat.ENCODING_MODE, errors=CommandCat.ERRORS_MODE)
                     self.logger.print(file_text)
