@@ -7,6 +7,7 @@ class Context:
     current_directory: Path
 
     HOME = Path.home()
+    HISTORY_PATH = HOME / '.history'
     TRASH_DIR_PATH = HOME / ".trash"
 
     def __init__(self):

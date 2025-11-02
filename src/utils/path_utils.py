@@ -150,8 +150,4 @@ class PathUtils:
         with zipfile.ZipFile(archive_name, "r") as zip:
             zip.extractall()
 
-    @staticmethod
-    def get_all_files_in_path(path: Path) -> list[Path]:
-        return list(
-            [cur_path for cur_path in path.rglob("*") if cur_path.is_file()]
-        )
+ 

@@ -28,8 +28,7 @@ class CommandLS(AbstractCommand):
         if self.output_help_if_need():
             return
 
-        removed = 0
-        removed += self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_presence)
+        removed = self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_presence)
         removed += self._remove_if(self.parsed_arguments.position_arguments, PathUtils.check_readable)
 
         if removed != 0 and len(self.parsed_arguments.position_arguments) == 0:
@@ -47,6 +46,9 @@ class CommandLS(AbstractCommand):
                 is_write_path = count_position_arguments != 1
                 for path in self.parsed_arguments.position_arguments:
                     current_path = PathUtils.get_resolved_path(Path(path))
+                    if Path(current_path).is_file():
+                        self.logger.print(current_path.name)
+                        continue
                     directory_content = PathUtils.get_directory_content(current_path)
                     self._output_content(directory_content, self.parsed_arguments, is_write_path)
 

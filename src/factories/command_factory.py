@@ -5,10 +5,12 @@ from src.commands.command_cat import CommandCat
 from src.commands.command_cd import CommandCD
 from src.commands.command_cp import CommandCP
 from src.commands.command_grep import CommandGrep
+from src.commands.command_history import CommandHistory
 from src.commands.command_ls import CommandLS
 from src.commands.command_mv import CommandMV
 from src.commands.command_rm import CommandRM
 from src.commands.command_tar import CommandTAR
+from src.commands.command_undo import CommandUndo
 from src.commands.command_zip import CommandZIP
 from src.common.logger import Logger
 from src.common.parser import Parser
@@ -38,7 +40,9 @@ class CommandFactoryImp(AbstractCommandFactory):
         "rm": CommandRM,
         "tar": CommandTAR,
         "zip": CommandZIP,
-        "grep": CommandGrep
+        "grep": CommandGrep,
+        "history": CommandHistory,
+        "undo": CommandUndo
     }
 
     def __init__(self, parser: Parser, logger: Logger):
