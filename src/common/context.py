@@ -11,5 +11,10 @@ class Context:
     TRASH_DIR_PATH = HOME / ".trash"
 
     def __init__(self):
+        """
+        Initialize the execution context and switch to the home directory.
+        :return: None
+        :rtype: None
+        """
         self.current_directory = Context.HOME
         chdir(self.current_directory)

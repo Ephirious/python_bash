@@ -18,9 +18,27 @@ class CommandCD(AbstractCommand):
     TILDA = "~"
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the cd command with parser and logger.
+        :param parser: Parser used to analyze command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(CommandCD.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
+        """
+        Change the current working directory based on provided path.
+        :param arguments: Parsed command arguments.
+        :type arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         self.parsed_arguments = self.parser.parse(CommandCD.OPTIONS, arguments)
         if self.output_help_if_need():
             return

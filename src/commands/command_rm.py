@@ -22,9 +22,27 @@ class CommandRM(AbstractCommand):
     POSITIVE_ANSWER = "y"
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the rm command with parser and logger.
+        :param parser: Parser used to analyze command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(CommandRM.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
+        """
+        Remove files or directories by moving them to the trash directory.
+        :param arguments: Parsed command arguments.
+        :type arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         self.parsed_arguments = self.parser.parse(CommandRM.OPTIONS, arguments)
         if self.output_help_if_need():
             return
@@ -50,9 +68,21 @@ class CommandRM(AbstractCommand):
 
     @staticmethod
     def _create_trash(path: Path) -> None:
+        """
+        Ensure that the trash directory exists.
+        :param path: Path to the trash directory.
+        :type path: Path
+        :return: None
+        :rtype: None
+        """
         PathUtils.mkdir(path, True)
 
     def _remove_directions_if_r_not_exist(self) -> int:
+        """
+        Remove directory paths when recursive removal is not requested.
+        :return: Count of removed directory paths.
+        :rtype: int
+        """
         if not AbstractCommand.is_in_parsed_arguments("-r", "--recursive", self.parsed_arguments):
             removed_paths = []
             for path_as_str in self.parsed_arguments.position_arguments:
@@ -68,6 +98,11 @@ class CommandRM(AbstractCommand):
         return 0
 
     def _ask_user(self) -> str:
+        """
+        Request confirmation from the user before removing paths.
+        :return: User confirmation answer.
+        :rtype: str
+        """
         while True:
             user_answer = input("Do you really want to remove the trash? [y/n]: ")
             if user_answer.lower() == "y" or user_answer.lower() == "n":

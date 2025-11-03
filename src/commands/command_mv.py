@@ -18,9 +18,27 @@ class CommandMV(AbstractCommand):
     }
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the mv command with parser and logger.
+        :param parser: Parser used to analyze command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(CommandMV.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
+        """
+        Move files or directories to the specified destination.
+        :param arguments: Parsed command arguments.
+        :type arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         self.parsed_arguments = self.parser.parse(CommandMV.OPTIONS, arguments)
         if self.output_help_if_need():
             return

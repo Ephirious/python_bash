@@ -21,10 +21,24 @@ class AbstractCommandFactory(ABC):
     parser: Parser
 
     def __init__(self, parser: Parser):
+        """
+        Initialize the command factory with a parser instance.
+        :param parser: Parser used to interpret command arguments.
+        :type parser: Parser
+        :return: None
+        :rtype: None
+        """
         self.parser = parser
 
     @abstractmethod
     def create_command(self, command: str) -> AbstractCommand:
+        """
+        Instantiate a command implementation by name.
+        :param command: Name of the command to build.
+        :type command: str
+        :return: Concrete command instance corresponding to the name.
+        :rtype: AbstractCommand
+        """
         pass
 
 
@@ -46,10 +60,26 @@ class CommandFactoryImp(AbstractCommandFactory):
     }
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the concrete command factory with parser and logger.
+        :param parser: Parser used to interpret command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for command output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(parser)
         self.logger = logger
 
     def create_command(self, command: str) -> AbstractCommand:
+        """
+        Instantiate a concrete command implementation by name.
+        :param command: Name of the command to build.
+        :type command: str
+        :return: Concrete command instance corresponding to the name.
+        :rtype: AbstractCommand
+        """
         if command in CommandFactoryImp.COMMANDS:
             return CommandFactoryImp.COMMANDS[command](self.parser, self.logger)
         raise UnknownCommand(command)

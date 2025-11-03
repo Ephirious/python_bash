@@ -14,9 +14,27 @@ class CommandHistory(AbstractCommand):
     }
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the history command with parser and logger.
+        :param parser: Parser used to analyze command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(CommandHistory.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
+        """
+        Display command history entries optionally limited by count.
+        :param arguments: Parsed command arguments.
+        :type arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         self.parsed_arguments = self.parser.parse(CommandHistory.OPTIONS, arguments)
         if self.output_help_if_need():
             return
@@ -38,6 +56,15 @@ class CommandHistory(AbstractCommand):
                 raise UnexpectedArgumentsException(self.parsed_arguments.position_arguments)
 
     def _get_entries(self, context: Context, count = 0):
+        """
+        Retrieve entries from the history file.
+        :param context: Shell execution context.
+        :type context: Context
+        :param count: Optional limit on the number of entries to retrieve.
+        :type count: int
+        :return: List of history entries.
+        :rtype: list[str]
+        """
         if count == 0:
             return context.HISTORY_PATH.open("r").readlines()
         else:

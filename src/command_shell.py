@@ -23,9 +23,19 @@ class CommandShell:
         self.logger = logger
 
     def run(self):
+        """
+        Run the interactive shell loop.
+        :return: None
+        :rtype: None
+        """
         self._start_shell_loop()
 
     def _start_shell_loop(self):
+        """
+        Execute the main loop that reads and processes user commands.
+        :return: None
+        :rtype: None
+        """
         while True:
             formatted_current_directory = "➜ " + self._get_path_to_cwd(str(self.context.current_directory)) + " "
             user_input = input(formatted_current_directory)
@@ -52,14 +62,37 @@ class CommandShell:
 
 
     def _replace_tilda(self, lexed_arguments: list[str]) -> None:
+        """
+        Replace tilde prefixes with the absolute home directory path.
+        :param lexed_arguments: Parsed argument tokens to normalize.
+        :type lexed_arguments: list[str]
+        :return: None
+        :rtype: None
+        """
         for i in range(len(lexed_arguments)):
             if lexed_arguments[i][0] == CommandShell.TILDA:
                 lexed_arguments[i] = lexed_arguments[i].replace(CommandShell.TILDA, str(self.context.HOME))
 
     def _get_path_to_cwd(self, path_as_str: str) -> str:
+        """
+        Replace the home directory portion of the path with a tilde.
+        :param path_as_str: Path string to format.
+        :type path_as_str: str
+        :return: Formatted path string with tilde substitution.
+        :rtype: str
+        """
         return path_as_str.replace(str(self.context.HOME), CommandShell.TILDA)
 
     def _write_history(self, path: Path, line: str) -> None:
+        """
+        Append the executed command to the history file resolving arguments.
+        :param path: Path to the history file.
+        :type path: Path
+        :param line: Raw command line executed.
+        :type line: str
+        :return: None
+        :rtype: None
+        """
         filemode = "a"
         input_arguments = self.lexer.lexing(line)
         arguments = input_arguments.get_arguments()

@@ -24,9 +24,27 @@ class CommandGrep(AbstractCommand):
     ERRORS_MODE: str = "ignore"
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the grep command with parser and logger.
+        :param parser: Parser used to analyze command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(CommandGrep.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
+        """
+        Search for patterns within files using the provided options.
+        :param arguments: Parsed command arguments.
+        :type arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         self.parsed_arguments = self.parser.parse(CommandGrep.OPTIONS, arguments)
         if self.output_help_if_need():
             return
@@ -51,6 +69,11 @@ class CommandGrep(AbstractCommand):
                             self._find(file)
 
     def _check_pattern_exists(self):
+        """
+        Validate that the supplied pattern is a valid regular expression.
+        :return: None
+        :rtype: None
+        """
         pattern = self._get_options_arguments("-p", "--pattern")
         try:
             re.compile(pattern)
@@ -58,6 +81,11 @@ class CommandGrep(AbstractCommand):
             raise InvalidArgumentsException(list(pattern))
 
     def _remove_if_not_exists_recursive_option(self):
+        """
+        Remove directory arguments when recursive search is disabled.
+        :return: None
+        :rtype: None
+        """
         if not self.is_in_parsed_arguments("-r", "--recursive", self.parsed_arguments):
             removed = list(
                 [path_as_str for path_as_str in self.parsed_arguments.position_arguments
@@ -69,6 +97,13 @@ class CommandGrep(AbstractCommand):
                 self.parsed_arguments.position_arguments.remove(removed_path_as_str)
 
     def _find(self, file: Path):
+        """
+        Search for the configured pattern within the provided file.
+        :param file: File path to inspect.
+        :type file: Path
+        :return: None
+        :rtype: None
+        """
         pattern = self._get_options_arguments("-p", "--pattern")
         text = file.read_text(CommandGrep.ENCODING_MODE, CommandGrep.ERRORS_MODE)
         found = []

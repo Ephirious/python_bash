@@ -22,9 +22,27 @@ class CommandCP(AbstractCommand):
     }
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the cp command with parser and logger.
+        :param parser: Parser used to analyze command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(CommandCP.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
+        """
+        Copy files or directories to the specified destination.
+        :param arguments: Parsed command arguments.
+        :type arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         self.parsed_arguments = self.parser.parse(CommandCP.OPTIONS, arguments)
         if self.output_help_if_need():
             return
@@ -54,9 +72,27 @@ class CommandCP(AbstractCommand):
 
 
     def _is_recursive_enable(self, parsed_arguments: ParsedArguments) -> bool:
+        """
+        Determine whether recursive copying is enabled.
+        :param parsed_arguments: Parsed command arguments.
+        :type parsed_arguments: ParsedArguments
+        :return: Flag indicating if recursive option is present.
+        :rtype: bool
+        """
         return self.is_in_parsed_arguments("-r", "--recursive", parsed_arguments)
 
     def _copy_src_to_dest(self, src: Path, dest: Path, context: Context) -> None:
+        """
+        Copy a source path to the destination respecting command options.
+        :param src: Source path to copy from.
+        :type src: Path
+        :param dest: Destination path to copy to.
+        :type dest: Path
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         if PathUtils.is_file(src):
             if PathUtils.is_directory(dest):
                 PathUtils.copy_file(src, dest)
@@ -70,6 +106,13 @@ class CommandCP(AbstractCommand):
             raise NotEnoughOptionException("-r")
 
     def _check_dest(self, dest: str) -> None:
+        """
+        Validate the destination path for copy operations.
+        :param dest: Destination path as string.
+        :type dest: str
+        :return: None
+        :rtype: None
+        """
         path = PathUtils.get_resolved_path(Path(dest))
         if PathUtils.is_path_exists(path) and PathUtils.is_directory(path):
             PathUtils.check_writable(path)

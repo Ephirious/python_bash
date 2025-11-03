@@ -20,9 +20,27 @@ class CommandUndo(AbstractCommand):
     }
 
     def __init__(self, parser: Parser, logger: Logger):
+        """
+        Initialize the undo command with parser and logger.
+        :param parser: Parser used to analyze command arguments.
+        :type parser: Parser
+        :param logger: Logger instance for output.
+        :type logger: Logger
+        :return: None
+        :rtype: None
+        """
         super().__init__(CommandUndo.OPTIONS, parser, logger)
 
     def execute(self, arguments: InputArguments, context: Context):
+        """
+        Revert the last file-manipulation command recorded in history.
+        :param arguments: Parsed command arguments.
+        :type arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         self.parsed_arguments = self.parser.parse(CommandUndo.OPTIONS, arguments)
         if self.output_help_if_need():
             return
@@ -43,6 +61,13 @@ class CommandUndo(AbstractCommand):
                 raise UnexpectedArgumentsException(self.parsed_arguments.position_arguments)
 
     def _find_last_command(self, context) -> tuple[int, str, list[str]]:
+        """
+        Locate the most recent rm, cp, or mv command in history.
+        :param context: Shell execution context.
+        :type context: Context
+        :return: Tuple containing entry index, command name, and arguments.
+        :rtype: tuple[int, str, list[str]]
+        """
         filemode = "r"
         number = 0
 
@@ -55,6 +80,15 @@ class CommandUndo(AbstractCommand):
         return -1, "", list()
 
     def _undo(self, command_as_str: tuple[int, str, list[str]], context: Context):
+        """
+        Perform undo logic for the provided history command entry.
+        :param command_as_str: Tuple with index, command name, and arguments.
+        :type command_as_str: tuple[int, str, list[str]]
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         number_command = command_as_str[0]
         command = command_as_str[1]
         arguments = command_as_str[2]
@@ -72,6 +106,15 @@ class CommandUndo(AbstractCommand):
 
 
     def _remove_entry(self, number: int, context: Context):
+        """
+        Remove a history entry by its sequential number.
+        :param number: Entry number to remove.
+        :type number: int
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         valid_entries = []
         with open(context.HISTORY_PATH, "r") as file:
             for num, line in enumerate(file.readlines()):
@@ -82,22 +125,61 @@ class CommandUndo(AbstractCommand):
             file.writelines(valid_entries)
 
     def _log_if_command_was_invalid(self, command):
+        """
+        Log that the referenced command could not be replayed.
+        :param command: Command name that failed to replay.
+        :type command: str
+        :return: None
+        :rtype: None
+        """
         self.logger.print(f"Last {command} command was invalid")
         self.logger.error(f"Last {command} command was invalid")
 
     def _log_if_command_called_with_help(self, command):
+        """
+        Log that the referenced command was invoked with help flags.
+        :param command: Command name associated with help invocation.
+        :type command: str
+        :return: None
+        :rtype: None
+        """
         self.logger.print(f"Last {command} command was called with flag -h or --help")
         self.logger.error(f"Last {command} command was called with flag -h or --help")
 
     def _log_if_file_not_found_in_trash(self, filename: str):
+        """
+        Log that the expected file was not found in the trash directory.
+        :param filename: Name of the missing file.
+        :type filename: str
+        :return: None
+        :rtype: None
+        """
         self.logger.print(f"This file or directory not found in the .trash directory: {filename}")
         self.logger.error(f"This file or directory not found in the .trash directory: {filename}")
 
     def _log_if_file_already_exists(self, filename: str, parent: Path):
+        """
+        Log that the undo operation cannot proceed because a file exists.
+        :param filename: Name of the conflicting file.
+        :type filename: str
+        :param parent: Parent directory where the conflict occurred.
+        :type parent: Path
+        :return: None
+        :rtype: None
+        """
         self.logger.print(f"Can't undo rm operation for {filename}, cause it already exists: in {parent}")
         self.logger.error(f"Can't undo rm operation for {filename}, cause it already exists: in {parent}")
 
     def _undo_rm(self, input_arguments: InputArguments, context: Context):
+        """
+        Undo the effects of the last rm command.
+        :param input_arguments: Arguments from the rm command.
+        :type input_arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         parsed_for_rm = ParsedArguments([], set(), {})
         try:
             parsed_for_rm = self.parser.parse(CommandRM.OPTIONS, input_arguments)
@@ -126,6 +208,15 @@ class CommandUndo(AbstractCommand):
                     PathUtils.move(path_in_trash, parent)
 
     def _undo_mv(self, input_arguments: InputArguments, context: Context):
+        """
+        Undo the effects of the last mv command.
+        :param input_arguments: Arguments from the mv command.
+        :type input_arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         parsed_for_mv = ParsedArguments([], set(), {})
         try:
             parsed_for_mv = self.parser.parse(CommandMV.OPTIONS, input_arguments)
@@ -163,6 +254,15 @@ class CommandUndo(AbstractCommand):
                         PathUtils.move(dest / src.name, src.parent / src.name)
 
     def _undo_cp(self, input_arguments: InputArguments, context: Context):
+        """
+        Undo the effects of the last cp command.
+        :param input_arguments: Arguments from the cp command.
+        :type input_arguments: InputArguments
+        :param context: Shell execution context.
+        :type context: Context
+        :return: None
+        :rtype: None
+        """
         parsed_for_cp = ParsedArguments([], set(), {})
         try:
             parsed_for_cp = self.parser.parse(CommandMV.OPTIONS, input_arguments)
